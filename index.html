@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anglecam Studio</title>
+    <title>Devilcam Studio</title>
     
-    <!-- Cropper.js CSS & JS via CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
 
@@ -41,151 +40,46 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
 
-        header h1 {
-            margin: 0;
-            font-size: 1.25rem;
-            color: var(--primary);
-            font-style: italic;
-        }
+        header h1 { margin: 0; font-size: 1.25rem; color: var(--primary); font-style: italic; }
 
-        .workspace {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-        }
+        .workspace { display: flex; flex: 1; overflow: hidden; }
 
         .sidebar {
-            width: 350px;
-            background-color: var(--panel-bg);
-            border-right: 1px solid var(--border);
-            padding: 1.5rem;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
+            width: 350px; background-color: var(--panel-bg); border-right: 1px solid var(--border);
+            padding: 1.5rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1.5rem;
         }
 
-        .control-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .control-group h3 {
-            margin: 0 0 0.5rem 0;
-            font-size: 0.875rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--text-muted);
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 0.5rem;
-        }
-
-        label {
-            font-size: 0.875rem;
-            font-weight: 500;
-        }
-
-        input[type="text"], input[type="file"], select {
-            padding: 0.5rem;
-            border: 1px solid var(--border);
-            border-radius: 0.375rem;
-            font-size: 0.875rem;
-            width: 100%;
-            box-sizing: border-box;
-            transition: border-color 0.2s;
-        }
-
-        input[type="text"]:focus, select:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(255, 85, 0, 0.1);
-        }
-
-        .button-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.5rem;
-        }
-
-        button {
-            padding: 0.625rem;
-            border: none;
-            border-radius: 0.375rem;
-            font-size: 0.875rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            background-color: #f3f4f6;
-            color: var(--text-main);
-        }
-
-        button:hover { background-color: #e5e7eb; }
+        .control-group { display: flex; flex-direction: column; gap: 0.5rem; }
+        .control-group h3 { margin: 0 0 0.5rem 0; font-size: 0.875rem; color: var(--text-muted); border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+        label { font-size: 0.875rem; font-weight: 500; }
+        input[type="text"], input[type="file"], select { padding: 0.5rem; border: 1px solid var(--border); border-radius: 0.375rem; width: 100%; box-sizing: border-box; }
+        input[type="text"]:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(255, 85, 0, 0.1); }
         
-        button.primary {
-            background-color: var(--primary);
-            color: white;
-            grid-column: 1 / -1;
-        }
+        .button-group { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+        button { padding: 0.625rem; border: none; border-radius: 0.375rem; font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        button:hover { background-color: #e5e7eb; }
+        button.primary { background-color: var(--primary); color: white; grid-column: 1 / -1; }
         button.primary:hover { background-color: var(--primary-hover); }
+        
+        /* New AI section styling */
+        .ai-box { background: #fdf4ff; border: 1px solid #f0abfc; padding: 10px; border-radius: 6px; display: flex; flex-direction: column; gap: 8px;}
+        button.ai-btn { background: linear-gradient(135deg, #a855f7, #ec4899); color: white; width: 100%; }
+        button.ai-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        button.ai-btn {
-            background: linear-gradient(135deg, #a855f7, #ec4899);
-            color: white;
-            grid-column: 1 / -1;
-            margin-top: 10px;
-        }
-        button.ai-btn:hover { opacity: 0.9; }
-
-        button.success {
-            background-color: #10b981;
-            color: white;
-            grid-column: 1 / -1;
-        }
+        button.success { background-color: #10b981; color: white; grid-column: 1 / -1; }
         button.success:hover { background-color: #059669; }
 
-        .main-stage {
-            flex: 1;
-            padding: 2rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background-color: #e5e5f7;
-            background-image:  radial-gradient(#cbd5e1 1px, transparent 1px);
-            background-size: 20px 20px;
-            overflow: auto;
-        }
-
-        .image-container {
-            max-width: 100%;
-            max-height: 70vh;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            background: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
+        .main-stage { flex: 1; padding: 2rem; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #e5e5f7; background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 20px 20px; overflow: auto; }
+        .image-container { max-width: 100%; max-height: 70vh; box-shadow: 0 10px 25px rgba(0,0,0,0.1); background: white; display: flex; justify-content: center; align-items: center; }
         #final-canvas { display: none; max-width: 100%; max-height: 70vh; }
         #crop-image { display: block; max-width: 100%; }
-        
-        .status-badge {
-            margin-top: 1rem;
-            padding: 0.5rem 1rem;
-            border-radius: 9999px;
-            font-size: 0.875rem;
-            font-weight: 500;
-            background-color: var(--panel-bg);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-
+        .status-badge { margin-top: 1rem; padding: 0.5rem 1rem; border-radius: 9999px; font-size: 0.875rem; font-weight: 500; background-color: var(--panel-bg); }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>Anglecam Studio</h1>
+        <h1>Devilcam Studio</h1>
         <div id="resolution-display" style="font-size: 0.875rem; color: var(--text-muted);">No image loaded</div>
     </header>
 
@@ -195,16 +89,21 @@
             <div class="control-group">
                 <h3>1. Source Image</h3>
                 <input type="file" id="imageUpload" accept="image/*">
-                <button class="ai-btn" id="btnEnhance">✨ AI Enhance (Gemini API)</button>
+                
+                <div class="ai-box">
+                    <label style="color: #a855f7;">AI Note Generator</label>
+                    <input type="text" id="aiPrompt" placeholder="E.g., Write a poetic caption...">
+                    <button class="ai-btn" id="btnEnhance">✨ Ask AI</button>
+                </div>
             </div>
 
             <div class="control-group" id="crop-controls" style="opacity: 0.5; pointer-events: none;">
                 <h3>2. Crop & Aspect Ratio</h3>
                 <div class="button-group">
                     <button onclick="setAspectRatio(NaN)">Free</button>
-                    <button onclick="setAspectRatio(1)">1:1 Square</button>
-                    <button onclick="setAspectRatio(4/3)">4:3 Standard</button>
-                    <button onclick="setAspectRatio(16/9)">16:9 Widescreen</button>
+                    <button onclick="setAspectRatio(1)">1:1</button>
+                    <button onclick="setAspectRatio(4/3)">4:3</button>
+                    <button onclick="setAspectRatio(16/9)">16:9</button>
                 </div>
             </div>
 
@@ -216,20 +115,18 @@
                 <input type="text" id="acc" value="3.79 m" placeholder="Accuracy">
                 <input type="text" id="azi" value="136° (SE)" placeholder="Azimuth">
                 <input type="text" id="pitch" value="94.0° (-111.8°)" placeholder="Pitch">
-                <input type="text" id="note" value="chandrakala gurung" placeholder="Note">
+                <input type="text" id="note" value="" placeholder="Your note will appear here">
                 <button class="primary" id="btnGenerate">Apply Watermark</button>
             </div>
 
             <div class="control-group" id="export-controls" style="display: none;">
                 <h3>4. Export</h3>
-                <label>Output Resolution</label>
                 <select id="exportResolution">
                     <option value="original">Original (Unscaled)</option>
                     <option value="1920">1080p HD (1920x1080)</option>
                     <option value="1280">720p HD (1280x720)</option>
-                    <option value="800">Web Optimized (800px)</option>
                 </select>
-                <button class="success" id="btnDownload">Download Final Image</button>
+                <button class="success" id="btnDownload">Download Image</button>
                 <button id="btnBackToCrop" style="margin-top: 10px;">Back to Cropping</button>
             </div>
 
@@ -272,12 +169,9 @@
                     
                     if (cropper) { cropper.destroy(); }
                     cropper = new Cropper(cropImage, {
-                        viewMode: 2,
-                        autoCropArea: 0.9,
-                        background: false,
-                        zoomable: true,
+                        viewMode: 2, autoCropArea: 0.9, background: false, zoomable: true,
                         ready() {
-                            statusText.innerText = "Status: Image loaded. Adjust crop box or select aspect ratio.";
+                            statusText.innerText = "Status: Image loaded.";
                             updateResolutionDisplay();
                         },
                         crop() { updateResolutionDisplay(); }
@@ -287,10 +181,7 @@
             }
         });
 
-        function setAspectRatio(ratio) {
-            if (cropper) { cropper.setAspectRatio(ratio); }
-        }
-
+        function setAspectRatio(ratio) { if (cropper) { cropper.setAspectRatio(ratio); } }
         function updateResolutionDisplay() {
             if (cropper) {
                 const data = cropper.getData(true);
@@ -298,17 +189,78 @@
             }
         }
 
+        // --- NEW AND IMPROVED AI CONNECTION ---
+        document.getElementById('btnEnhance').addEventListener('click', async () => {
+            if (!cropper && !cropImage.src) {
+                alert("Please upload an image first.");
+                return;
+            }
+
+            const aiBtn = document.getElementById('btnEnhance');
+            aiBtn.disabled = true;
+            statusText.innerText = "Status: Asking Gemini... (This may take a few seconds)";
+
+            try {
+                // Get the user's prompt, or use a default one
+                let userPrompt = document.getElementById('aiPrompt').value.trim();
+                if(!userPrompt) {
+                    userPrompt = "Look at this image. Write a short, single-sentence caption describing the scene.";
+                }
+
+                // CRITICAL FIX: Downscale the image to prevent Vercel 4.5MB payload errors!
+                let base64Image;
+                if(cropper) {
+                    const smallCanvas = cropper.getCroppedCanvas({
+                        maxWidth: 800, // Compress to max 800px width for the API
+                        maxHeight: 800,
+                        imageSmoothingEnabled: true,
+                    });
+                    // Quality set to 0.7 to heavily reduce file size for transit
+                    base64Image = smallCanvas.toDataURL('image/jpeg', 0.7); 
+                } else {
+                    alert("Please adjust the crop first.");
+                    aiBtn.disabled = false;
+                    return;
+                }
+
+                const response = await fetch('/api/enhance', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ image: base64Image, prompt: userPrompt })
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(errorText || "Server error");
+                }
+
+                const data = await response.json();
+
+                if (data.text) {
+                    // Automatically drop the AI's text into the Note field!
+                    document.getElementById('note').value = data.text.replace(/\n/g, ' ').trim();
+                    statusText.innerText = "Status: AI text generated successfully!";
+                }
+
+            } catch (error) {
+                console.error("AI Error:", error);
+                alert("Failed to communicate with AI. Check console for details.");
+                statusText.innerText = "Status: Error calling AI.";
+            } finally {
+                aiBtn.disabled = false;
+            }
+        });
+
+        // --- GENERATE FINAL IMAGE ---
         document.getElementById('btnGenerate').addEventListener('click', () => {
             if (!cropper) return;
 
             finalCroppedCanvas = cropper.getCroppedCanvas({
-                imageSmoothingEnabled: true,
-                imageSmoothingQuality: 'high',
+                imageSmoothingEnabled: true, imageSmoothingQuality: 'high',
             });
 
             finalCanvas.width = finalCroppedCanvas.width;
             finalCanvas.height = finalCroppedCanvas.height;
-
             ctx.drawImage(finalCroppedCanvas, 0, 0);
 
             const inputs = ['lat', 'lon', 'ele', 'acc', 'azi', 'pitch', 'note'];
@@ -322,11 +274,9 @@
 
             const fontSize = Math.max(16, finalCanvas.height * 0.022); 
 
-            // --- 1. Draw Data Box (Bottom Left) ---
             if (lines.length > 0) {
                 ctx.font = `${fontSize}px Arial, sans-serif`;
-                ctx.textAlign = 'left';
-                ctx.textBaseline = 'top';
+                ctx.textAlign = 'left'; ctx.textBaseline = 'top';
 
                 const padding = fontSize * 0.5;
                 const lineHeight = fontSize * 1.2;
@@ -335,9 +285,7 @@
                 let maxWidth = 0;
                 lines.forEach(line => maxWidth = Math.max(maxWidth, ctx.measureText(line).width));
                 const boxWidth = maxWidth + (padding * 2);
-
-                const boxX = 0;
-                const boxY = finalCanvas.height - boxHeight;
+                const boxX = 0; const boxY = finalCanvas.height - boxHeight;
 
                 ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
                 ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
@@ -348,29 +296,17 @@
                 });
             }
 
-            // --- 2. Draw Anglecam Branding (Bottom Right) ---
-            const brandText = "Powered by Anglecam";
-            
-            // Set font to italic, bold, and slightly larger than the data font
+            const brandText = "Powered by Devilcam";
             ctx.font = `italic bold ${fontSize * 1.3}px Arial, sans-serif`;
-            ctx.textAlign = 'right';
-            ctx.textBaseline = 'bottom';
+            ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
             
-            // Positioning (padding from the edge)
             const brandPadding = fontSize * 0.8;
             const brandX = finalCanvas.width - brandPadding;
             const brandY = finalCanvas.height - brandPadding;
 
-            // Draw Dark Blue Outline
-            ctx.strokeStyle = '#1A237E'; // Dark blue stroke
-            ctx.lineWidth = fontSize * 0.2; // Outline thickness
-            ctx.lineJoin = 'round';
+            ctx.strokeStyle = '#1A237E'; ctx.lineWidth = fontSize * 0.2; ctx.lineJoin = 'round';
             ctx.strokeText(brandText, brandX, brandY);
-
-            // Draw Orange Fill
-            ctx.fillStyle = '#FF5500'; // Vibrant orange
-            ctx.fillText(brandText, brandX, brandY);
-
+            ctx.fillStyle = '#FF5500'; ctx.fillText(brandText, brandX, brandY);
 
             cropImage.style.display = 'none';
             if (cropper) { cropper.destroy(); cropper = null; } 
@@ -403,73 +339,17 @@
                     const scaleFactor = targetWidth / finalCanvas.width;
                     const targetHeight = finalCanvas.height * scaleFactor;
                     exportCanvas = document.createElement('canvas');
-                    exportCanvas.width = targetWidth;
-                    exportCanvas.height = targetHeight;
+                    exportCanvas.width = targetWidth; exportCanvas.height = targetHeight;
                     const exportCtx = exportCanvas.getContext('2d');
                     exportCtx.drawImage(finalCanvas, 0, 0, targetWidth, targetHeight);
                 }
             }
 
             const link = document.createElement('a');
-            link.download = `Anglecam_photo_${Date.now()}.jpg`;
+            link.download = `devilcam_photo_${Date.now()}.jpg`;
             link.href = exportCanvas.toDataURL('image/jpeg', 0.95); 
             link.click();
         });
-
-        // Placeholder for API
-       // --- REAL GEMINI API CONNECTION ---
-document.getElementById('btnEnhance').addEventListener('click', async () => {
-    if (!cropper && !cropImage.src) {
-        alert("Please upload an image first.");
-        return;
-    }
-
-    const originalText = statusText.innerText;
-    statusText.innerText = "Status: Sending to AI... Please wait.";
-    document.getElementById('btnEnhance').disabled = true; // Prevent double-clicking
-
-    try {
-        // 1. Get the current image as Base64 text
-        let base64Image = cropImage.src;
-        if(cropper) {
-            // If they started cropping, send the cropped version
-            base64Image = cropper.getCroppedCanvas().toDataURL('image/jpeg');
-        }
-
-        // 2. Send it securely to your Vercel backend
-        const response = await fetch('/api/enhance', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ image: base64Image })
-        });
-
-        if (!response.ok) {
-            throw new Error(`Server returned ${response.status}`);
-        }
-
-        const data = await response.json();
-
-        // 3. Handle the result
-        if (data.enhancedImage) {
-            // Replace the image on screen with the new AI image
-            cropImage.src = data.enhancedImage;
-            if (cropper) cropper.replace(data.enhancedImage);
-            statusText.innerText = "Status: AI Enhancement applied!";
-        } else if (data.text) {
-            // If the AI just returns text analysis
-            alert("AI Says: " + data.text);
-            statusText.innerText = "Status: AI analysis complete.";
-        }
-
-    } catch (error) {
-        console.error(error);
-        alert("Error connecting to AI: " + error.message);
-        statusText.innerText = originalText;
-    } finally {
-        document.getElementById('btnEnhance').disabled = false;
-    }
-});
-
     </script>
 </body>
 </html>
