@@ -15,8 +15,8 @@ export default async function handler(req, res) {
         // Grab the custom prompt sent from the frontend
         const customPrompt = req.body.prompt; 
 
-        // Call Gemini
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+        // CRITICAL FIX: Changed the model name to "gemini-1.5-flash-latest"
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
