@@ -61,7 +61,6 @@
         button.primary { background-color: var(--primary); color: white; grid-column: 1 / -1; }
         button.primary:hover { background-color: var(--primary-hover); }
         
-        /* New AI section styling */
         .ai-box { background: #fdf4ff; border: 1px solid #f0abfc; padding: 10px; border-radius: 6px; display: flex; flex-direction: column; gap: 8px;}
         button.ai-btn { background: linear-gradient(135deg, #a855f7, #ec4899); color: white; width: 100%; }
         button.ai-btn:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -70,9 +69,34 @@
         button.success:hover { background-color: #059669; }
 
         .main-stage { flex: 1; padding: 2rem; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #e5e5f7; background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 20px 20px; overflow: auto; }
-        .image-container { max-width: 100%; max-height: 70vh; box-shadow: 0 10px 25px rgba(0,0,0,0.1); background: white; display: flex; justify-content: center; align-items: center; }
+        
+        /* Updated Image Container Styles for the Empty State */
+        .image-container { 
+            width: 100%; 
+            min-height: 400px; /* Gives the box a nice default size */
+            max-height: 70vh; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+            background: white; 
+            border-radius: 8px;
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            overflow: hidden;
+        }
+        
+        .empty-state {
+            color: #9ca3af;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+        }
+
+        /* Hide images natively until loaded */
+        #crop-image { display: none; max-width: 100%; max-height: 70vh; }
         #final-canvas { display: none; max-width: 100%; max-height: 70vh; }
-        #crop-image { display: block; max-width: 100%; }
+        
         .status-badge { margin-top: 1rem; padding: 0.5rem 1rem; border-radius: 9999px; font-size: 0.875rem; font-weight: 500; background-color: var(--panel-bg); }
     </style>
 </head>
@@ -134,6 +158,13 @@
 
         <div class="main-stage">
             <div class="image-container">
+                <!-- NEW: Professional Empty State Placeholder -->
+                <div id="empty-state" class="empty-state">
+                    <svg width="56" height="56" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"></path>
+                    </svg>
+                    <span>Upload a photo to begin</span>
+                </div>
                 <img id="crop-image" src="" alt="Workspace">
                 <canvas id="final-canvas"></canvas>
             </div>
@@ -145,6 +176,7 @@
         const imageUpload = document.getElementById('imageUpload');
         const cropImage = document.getElementById('crop-image');
         const finalCanvas = document.getElementById('final-canvas');
+        const emptyState = document.getElementById('empty-state'); // Reference to empty state
         const ctx = finalCanvas.getContext('2d');
         const statusText = document.getElementById('status');
         const resDisplay = document.getElementById('resolution-display');
@@ -157,8 +189,12 @@
             if (files && files.length > 0) {
                 const reader = new FileReader();
                 reader.onload = function(event) {
+                    
+                    // Hide the empty state and reveal the image tag!
+                    emptyState.style.display = 'none';
                     document.getElementById('final-canvas').style.display = 'none';
                     cropImage.style.display = 'block';
+                    
                     document.getElementById('crop-controls').style.opacity = '1';
                     document.getElementById('crop-controls').style.pointerEvents = 'auto';
                     document.getElementById('data-controls').style.opacity = '1';
@@ -189,7 +225,6 @@
             }
         }
 
-        // --- NEW AND IMPROVED AI CONNECTION ---
         document.getElementById('btnEnhance').addEventListener('click', async () => {
             if (!cropper && !cropImage.src) {
                 alert("Please upload an image first.");
@@ -201,21 +236,18 @@
             statusText.innerText = "Status: Asking Gemini... (This may take a few seconds)";
 
             try {
-                // Get the user's prompt, or use a default one
                 let userPrompt = document.getElementById('aiPrompt').value.trim();
                 if(!userPrompt) {
                     userPrompt = "Look at this image. Write a short, single-sentence caption describing the scene.";
                 }
 
-                // CRITICAL FIX: Downscale the image to prevent Vercel 4.5MB payload errors!
                 let base64Image;
                 if(cropper) {
                     const smallCanvas = cropper.getCroppedCanvas({
-                        maxWidth: 800, // Compress to max 800px width for the API
+                        maxWidth: 800, 
                         maxHeight: 800,
                         imageSmoothingEnabled: true,
                     });
-                    // Quality set to 0.7 to heavily reduce file size for transit
                     base64Image = smallCanvas.toDataURL('image/jpeg', 0.7); 
                 } else {
                     alert("Please adjust the crop first.");
@@ -237,7 +269,6 @@
                 const data = await response.json();
 
                 if (data.text) {
-                    // Automatically drop the AI's text into the Note field!
                     document.getElementById('note').value = data.text.replace(/\n/g, ' ').trim();
                     statusText.innerText = "Status: AI text generated successfully!";
                 }
@@ -251,7 +282,6 @@
             }
         });
 
-        // --- GENERATE FINAL IMAGE ---
         document.getElementById('btnGenerate').addEventListener('click', () => {
             if (!cropper) return;
 
