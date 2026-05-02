@@ -417,9 +417,58 @@
         });
 
         // Placeholder for API
-        document.getElementById('btnEnhance').addEventListener('click', () => {
-            alert("AI Enhancement requires backend API configuration. See the guide below!");
+       // --- REAL GEMINI API CONNECTION ---
+document.getElementById('btnEnhance').addEventListener('click', async () => {
+    if (!cropper && !cropImage.src) {
+        alert("Please upload an image first.");
+        return;
+    }
+
+    const originalText = statusText.innerText;
+    statusText.innerText = "Status: Sending to AI... Please wait.";
+    document.getElementById('btnEnhance').disabled = true; // Prevent double-clicking
+
+    try {
+        // 1. Get the current image as Base64 text
+        let base64Image = cropImage.src;
+        if(cropper) {
+            // If they started cropping, send the cropped version
+            base64Image = cropper.getCroppedCanvas().toDataURL('image/jpeg');
+        }
+
+        // 2. Send it securely to your Vercel backend
+        const response = await fetch('/api/enhance', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image: base64Image })
         });
+
+        if (!response.ok) {
+            throw new Error(`Server returned ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        // 3. Handle the result
+        if (data.enhancedImage) {
+            // Replace the image on screen with the new AI image
+            cropImage.src = data.enhancedImage;
+            if (cropper) cropper.replace(data.enhancedImage);
+            statusText.innerText = "Status: AI Enhancement applied!";
+        } else if (data.text) {
+            // If the AI just returns text analysis
+            alert("AI Says: " + data.text);
+            statusText.innerText = "Status: AI analysis complete.";
+        }
+
+    } catch (error) {
+        console.error(error);
+        alert("Error connecting to AI: " + error.message);
+        statusText.innerText = originalText;
+    } finally {
+        document.getElementById('btnEnhance').disabled = false;
+    }
+});
 
     </script>
 </body>
