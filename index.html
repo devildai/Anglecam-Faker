@@ -137,7 +137,6 @@
                 <h3>3. GPS Data</h3>
                 <input type="text" id="lat" value="28.20498" placeholder="Latitude">
                 <input type="text" id="lon" value="83.987098" placeholder="Longitude">
-                <input type="text" id="ele" value="836.15±1.09 m" placeholder="Elevation">
                 <input type="text" id="acc" value="3.79 m" placeholder="Accuracy">
                 <input type="text" id="azi" value="136° (SE)" placeholder="Azimuth">
                 <input type="text" id="pitch" value="94.0° (-111.8°)" placeholder="Pitch">
@@ -246,8 +245,8 @@
             finalCanvas.height = finalCroppedCanvas.height;
             ctx.drawImage(finalCroppedCanvas, 0, 0);
 
-            const inputs = ['lat', 'lon', 'ele', 'acc', 'azi', 'pitch', 'note'];
-            const labels = ['Latitude', 'Longitude', 'Elevation', 'Accuracy', 'Azimuth', 'Pitch', 'Note'];
+            const inputs = ['lat', 'lon', 'acc', 'azi', 'pitch', 'note'];
+            const labels = ['Latitude', 'Longitude', 'Accuracy', 'Azimuth', 'Pitch', 'Note'];
             const lines = [];
 
             inputs.forEach((id, index) => {
