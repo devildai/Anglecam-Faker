@@ -260,16 +260,16 @@
                 ctx.font = `${fontSize}px Arial, sans-serif`;
                 ctx.textAlign = 'left'; ctx.textBaseline = 'top';
 
-                const padding = fontSize * 0.5;
+                const padding = fontSize * 0.25;
                 const lineHeight = fontSize * 1.2;
-                const boxHeight = (lines.length * lineHeight) + (padding * 2);
+                const boxHeight = (lines.length * lineHeight) + (padding);
 
                 let maxWidth = 0;
                 lines.forEach(line => maxWidth = Math.max(maxWidth, ctx.measureText(line).width));
-                const boxWidth = maxWidth + (padding * 2);
+                const boxWidth = maxWidth + (padding*8);
                 const boxX = 0; const boxY = finalCanvas.height - boxHeight;
 
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
                 ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
 
                 ctx.fillStyle = '#000000';
@@ -288,7 +288,7 @@
 
             ctx.strokeStyle = '#1A237E'; ctx.lineWidth = fontSize * 0.2; ctx.lineJoin = 'round';
             ctx.strokeText(brandText, brandX, brandY);
-            ctx.fillStyle = '#FF5500'; ctx.fillText(brandText, brandX, brandY);
+            ctx.fillStyle = '#EB5321'; ctx.fillText(brandText, brandX, brandY);
 
             cropImage.style.display = 'none';
             if (cropper) { cropper.destroy(); cropper = null; } 
