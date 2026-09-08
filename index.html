@@ -9,6 +9,13 @@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+    
+    <!-- Leaflet for Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- Tesseract.js for OCR -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
     <style>
         :root {
@@ -54,8 +61,8 @@
         .control-group { display: flex; flex-direction: column; gap: 0.5rem; }
         .control-group h3 { margin: 0 0 0.5rem 0; font-size: 0.875rem; color: var(--text-muted); border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
         label { font-size: 0.875rem; font-weight: 500; }
-        input[type="text"], input[type="file"], select { padding: 0.5rem; border: 1px solid var(--border); border-radius: 0.375rem; width: 100%; box-sizing: border-box; }
-        input[type="text"]:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(255, 85, 0, 0.1); }
+        input[type="text"], input[type="file"], select, input[type="datetime-local"] { padding: 0.5rem; border: 1px solid var(--border); border-radius: 0.375rem; width: 100%; box-sizing: border-box; }
+        input[type="text"]:focus, select:focus, input[type="datetime-local"]:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(255, 85, 0, 0.1); }
         
         .button-group { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
         button { padding: 0.625rem; border: none; border-radius: 0.375rem; font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
@@ -99,6 +106,18 @@
         #final-canvas { display: none; max-width: 100%; max-height: 70vh; }
         
         .status-badge { margin-top: 1rem; padding: 0.5rem 1rem; border-radius: 9999px; font-size: 0.875rem; font-weight: 500; background-color: var(--panel-bg); }
+
+        /* Modal Styles */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;
+        }
+        .modal-content {
+            background: white; padding: 1rem; border-radius: 8px; width: 90%; max-width: 500px;
+            display: flex; flex-direction: column; gap: 1rem;
+        }
+        #map { height: 300px; width: 100%; border-radius: 4px; z-index: 1; }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 0.5rem; }
     </style>
 </head>
 <body>
@@ -114,9 +133,10 @@
             <div class="control-group">
                 <h3>1. Source Image</h3>
                 <input type="file" id="imageUpload" accept="image/*">
+                <button id="btnExtract" class="name-btn" style="background-color: #f59e0b; margin-top: 0.5rem; display: none;">🪄 Scan Existing Tag (OCR)</button>
                 
                 <!-- Repurposed UI Box -->
-                <div class="name-box">
+                <div class="name-box" style="margin-top: 0.5rem;">
                     <label style="color: #0369a1; font-weight: bold;">Export Filename</label>
                     <input type="text" id="customFileName" placeholder="e.g., site_survey_01">
                     <button class="name-btn" id="btnSetName">Set Custom Name</button>
@@ -126,21 +146,28 @@
             <div class="control-group" id="crop-controls" style="opacity: 0.5; pointer-events: none;">
                 <h3>2. Crop & Aspect Ratio</h3>
                 <div class="button-group">
-                    <button onclick="setAspectRatio(NaN)">Free</button>
-                    <button onclick="setAspectRatio(1)">1:1</button>
-                    <button onclick="setAspectRatio(4/3)">4:3</button>
+                    <button onclick="setAspectRatio(9/16)">9:16</button>
                     <button onclick="setAspectRatio(16/9)">16:9</button>
+                    <button onclick="setAspectRatio(3/4)">3:4</button>
+                    <button onclick="setAspectRatio(4/3)">4:3</button>
                 </div>
             </div>
 
             <div class="control-group" id="data-controls" style="opacity: 0.5; pointer-events: none;">
                 <h3>3. GPS Data</h3>
-                <input type="text" id="lat" value="28.20498" placeholder="Latitude">
-                <input type="text" id="lon" value="83.987098" placeholder="Longitude">
+                <div style="display: flex; gap: 0.5rem;">
+                    <input type="text" id="lat" value="28.20498" placeholder="Latitude" style="flex: 1;">
+                    <input type="text" id="lon" value="83.987098" placeholder="Longitude" style="flex: 1;">
+                </div>
+                <button class="name-btn" id="btnOpenMap" style="background-color: #4f46e5; margin-bottom: 0.5rem;">Choose on Map</button>
                 <input type="text" id="acc" value="3.79 m" placeholder="Accuracy">
                 <input type="text" id="azi" value="136° (SE)" placeholder="Azimuth">
                 <input type="text" id="pitch" value="94.0° (-111.8°)" placeholder="Pitch">
-                <input type="text" id="note" value="" placeholder="Note (e.g., John Doe)">
+                
+                <label style="margin-top: 0.5rem;">Time Selection</label>
+                <input type="datetime-local" id="timeInput">
+
+                <input type="text" id="note" value="" placeholder="Note (e.g., sudip poudel)">
                 <button class="primary" id="btnGenerate">Apply Watermark</button>
             </div>
 
@@ -172,6 +199,18 @@
         </div>
     </div>
 
+    <!-- Map Modal -->
+    <div class="modal-overlay" id="mapModal">
+        <div class="modal-content">
+            <h3 style="margin: 0;">Select Location</h3>
+            <div id="map"></div>
+            <div class="modal-actions">
+                <button id="btnCancelMap">Cancel</button>
+                <button class="primary" id="btnConfirmMap">Confirm</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const imageUpload = document.getElementById('imageUpload');
         const cropImage = document.getElementById('crop-image');
@@ -181,6 +220,67 @@
         const statusText = document.getElementById('status');
         const resDisplay = document.getElementById('resolution-display');
         
+        // Initialize Time & Defaults
+        window.addEventListener('DOMContentLoaded', () => {
+            const now = new Date();
+            const tzOffset = now.getTimezoneOffset() * 60000;
+            const localISOTime = (new Date(Date.now() - tzOffset)).toISOString().slice(0, 16);
+            document.getElementById('timeInput').value = localISOTime;
+            
+            document.getElementById('lat').value = "28.206849";
+            document.getElementById('lon').value = "83.994412";
+            
+            const randAcc = (Math.random() * (6.47 - 3.39) + 3.39).toFixed(2);
+            document.getElementById('acc').value = `${randAcc} m`;
+
+            const randAzi = Math.floor(Math.random() * 360);
+            const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+            const dirStr = directions[Math.round(randAzi / 45) % 8];
+            document.getElementById('azi').value = `${randAzi}° (${dirStr})`;
+
+            const pitch1 = (Math.random() * 180 - 90).toFixed(1);
+            const pitch2 = (Math.random() * 180 - 90).toFixed(1);
+            document.getElementById('pitch').value = `${pitch1}° (${pitch2}°)`;
+        });
+
+        // Map Logic
+        let map, marker;
+        document.getElementById('btnOpenMap').addEventListener('click', () => {
+            document.getElementById('mapModal').style.display = 'flex';
+            if (!map) {
+                const initLat = parseFloat(document.getElementById('lat').value) || 28.206849;
+                const initLon = parseFloat(document.getElementById('lon').value) || 83.994412;
+                map = L.map('map').setView([initLat, initLon], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '© OpenStreetMap'
+                }).addTo(map);
+                marker = L.marker([initLat, initLon]).addTo(map);
+
+                map.on('click', function(e) {
+                    marker.setLatLng(e.latlng);
+                });
+            } else {
+                const currentLat = parseFloat(document.getElementById('lat').value);
+                const currentLon = parseFloat(document.getElementById('lon').value);
+                if(!isNaN(currentLat) && !isNaN(currentLon)){
+                    const latlng = [currentLat, currentLon];
+                    marker.setLatLng(latlng);
+                    map.setView(latlng);
+                }
+            }
+            setTimeout(() => { map.invalidateSize(); }, 100);
+        });
+        document.getElementById('btnCancelMap').addEventListener('click', () => {
+            document.getElementById('mapModal').style.display = 'none';
+        });
+        document.getElementById('btnConfirmMap').addEventListener('click', () => {
+            const pos = marker.getLatLng();
+            document.getElementById('lat').value = pos.lat.toFixed(6);
+            document.getElementById('lon').value = pos.lng.toFixed(6);
+            document.getElementById('mapModal').style.display = 'none';
+        });
+
         let cropper = null;
         let finalCroppedCanvas = null;
 
@@ -192,25 +292,38 @@
                     
                     emptyState.style.display = 'none';
                     document.getElementById('final-canvas').style.display = 'none';
-                    cropImage.style.display = 'block';
-                    
-                    document.getElementById('crop-controls').style.opacity = '1';
-                    document.getElementById('crop-controls').style.pointerEvents = 'auto';
-                    document.getElementById('data-controls').style.opacity = '1';
-                    document.getElementById('data-controls').style.pointerEvents = 'auto';
                     document.getElementById('export-controls').style.display = 'none';
 
+                    cropImage.onload = function() {
+                        document.getElementById('btnExtract').style.display = 'block';
+                        document.getElementById('crop-controls').style.opacity = '1';
+                        document.getElementById('crop-controls').style.pointerEvents = 'auto';
+                        document.getElementById('data-controls').style.opacity = '1';
+                        document.getElementById('data-controls').style.pointerEvents = 'auto';
+
+                        if (cropper) { cropper.destroy(); }
+                        
+                        // Enforce compulsory aspect ratio based on orientation
+                        const imgRatio = cropImage.naturalWidth / cropImage.naturalHeight;
+                        let initialRatio = 9/16; // default tall portrait
+                        if (imgRatio >= 1) {
+                            initialRatio = 16/9;
+                        } else if (imgRatio > 0.6) {
+                            initialRatio = 3/4;
+                        }
+                        
+                        cropper = new Cropper(cropImage, {
+                            aspectRatio: initialRatio,
+                            viewMode: 2, autoCropArea: 0.95, background: false, zoomable: true,
+                            ready() {
+                                statusText.innerText = "Status: Image loaded.";
+                                updateResolutionDisplay();
+                            },
+                            crop() { updateResolutionDisplay(); }
+                        });
+                    };
                     cropImage.src = event.target.result;
-                    
-                    if (cropper) { cropper.destroy(); }
-                    cropper = new Cropper(cropImage, {
-                        viewMode: 2, autoCropArea: 0.9, background: false, zoomable: true,
-                        ready() {
-                            statusText.innerText = "Status: Image loaded.";
-                            updateResolutionDisplay();
-                        },
-                        crop() { updateResolutionDisplay(); }
-                    });
+                    cropImage.style.display = 'block';
                 };
                 reader.readAsDataURL(files[0]);
             }
@@ -220,9 +333,112 @@
         function updateResolutionDisplay() {
             if (cropper) {
                 const data = cropper.getData(true);
-                resDisplay.innerText = `Current Output Size: ${data.width} x ${data.height} px`;
+                resDisplay.innerText = `Current Output Size: ${Math.round(data.width)} x ${Math.round(data.height)} px`;
             }
         }
+
+        // --- NEW: OCR Logic for existing tags ---
+        document.getElementById('btnExtract').addEventListener('click', async () => {
+            if (!cropper) return;
+            statusText.innerText = "Status: Scanning image for text... please wait.";
+            
+            try {
+                const sourceImage = new Image();
+                sourceImage.src = cropImage.src;
+                
+                sourceImage.onload = async () => {
+                    const tempCanvas = document.createElement('canvas');
+                    const tCtx = tempCanvas.getContext('2d');
+                    
+                    // Only scan the bottom 40% and left 60% of the image for speed and accuracy
+                    // This avoids scanning the branding text on the right entirely!
+                    const scanHeight = sourceImage.naturalHeight * 0.4;
+                    const scanWidth = sourceImage.naturalWidth * 0.6;
+                    tempCanvas.width = scanWidth;
+                    tempCanvas.height = scanHeight;
+                    
+                    tCtx.drawImage(
+                        sourceImage, 
+                        0, sourceImage.naturalHeight - scanHeight, 
+                        scanWidth, scanHeight, 
+                        0, 0, 
+                        tempCanvas.width, tempCanvas.height
+                    );
+                    
+                    const result = await Tesseract.recognize(tempCanvas, 'eng', {
+                        logger: m => {
+                            if(m.status === 'recognizing text') {
+                                statusText.innerText = `Status: Scanning... ${Math.round(m.progress * 100)}%`;
+                            }
+                        }
+                    });
+                    
+                    const text = result.data.text;
+                    
+                    // Strict parsing to ignore garbage OCR characters
+                    const latMatch = text.match(/Latitude:\s*([\d\.]+)/i);
+                    if(latMatch) document.getElementById('lat').value = latMatch[1];
+                    
+                    const lonMatch = text.match(/Longitude:\s*([\d\.]+)/i);
+                    if(lonMatch) document.getElementById('lon').value = lonMatch[1];
+                    
+                    const accMatch = text.match(/Accuracy:\s*([\d\.]+\s*m)/i);
+                    if(accMatch) document.getElementById('acc').value = accMatch[1].trim();
+                    
+                    const aziMatch = text.match(/Azimuth:\s*([-\d]+.*?\))/i);
+                    if(aziMatch) document.getElementById('azi').value = aziMatch[1].trim();
+                    
+                    const pitchMatch = text.match(/Pitch:\s*([-\d]+.*?\))/i);
+                    if(pitchMatch) document.getElementById('pitch').value = pitchMatch[1].trim();
+                    
+                    const noteMatch = text.match(/Note:\s*([^\n]+)/i);
+                    if(noteMatch) {
+                        let noteStr = noteMatch[1].trim();
+                        noteStr = noteStr.replace(/[>~©]+.*$/, '').trim(); // clear trailing noise just in case
+                        document.getElementById('note').value = noteStr;
+                    }
+                    
+                    const timeMatch = text.match(/Time:\s*([\d\.]+)\s+([\d:]+)/i);
+                    if (timeMatch) {
+                        const dateParts = timeMatch[1].split('.');
+                        if (dateParts.length === 3) {
+                            const isoStr = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}T${timeMatch[2]}`;
+                            document.getElementById('timeInput').value = isoStr;
+                        }
+                    }
+                    
+                    // Update map marker if available
+                    if (map && marker) {
+                        const currentLat = parseFloat(document.getElementById('lat').value);
+                        const currentLon = parseFloat(document.getElementById('lon').value);
+                        if(!isNaN(currentLat) && !isNaN(currentLon)){
+                            const latlng = [currentLat, currentLon];
+                            marker.setLatLng(latlng);
+                            map.setView(latlng);
+                        }
+                    }
+                    
+                    statusText.innerText = "Status: Scan complete! Data imported. Auto-cropping old tag...";
+                    
+                    // Auto-crop out the bottom 15% of the image (where the tag usually is)
+                    const canvasData = cropper.getCanvasData();
+                    const newHeight = canvasData.height * 0.85;
+                    cropper.setCropBoxData({
+                        top: canvasData.top,
+                        left: canvasData.left,
+                        width: canvasData.width,
+                        height: newHeight
+                    });
+                    
+                    setTimeout(() => {
+                        statusText.innerText = "Status: Ready. Edit your data and apply the new watermark.";
+                    }, 2000);
+                };
+            } catch (err) {
+                statusText.innerText = "Status: OCR Failed. Could not read text.";
+                console.error(err);
+            }
+        });
 
         // --- NEW: Filename Set Button Logic ---
         document.getElementById('btnSetName').addEventListener('click', () => {
@@ -245,12 +461,30 @@
             finalCanvas.height = finalCroppedCanvas.height;
             ctx.drawImage(finalCroppedCanvas, 0, 0);
 
-            const inputs = ['lat', 'lon', 'acc', 'azi', 'pitch', 'note'];
-            const labels = ['Latitude', 'Longitude', 'Accuracy', 'Azimuth', 'Pitch', 'Note'];
+            const inputs = ['lat', 'lon', 'acc', 'azi', 'pitch', 'time', 'note'];
+            const labels = ['Latitude', 'Longitude', 'Accuracy', 'Azimuth', 'Pitch', 'Time', 'Note'];
             const lines = [];
 
             inputs.forEach((id, index) => {
-                const val = document.getElementById(id).value;
+                let val;
+                if (id === 'time') {
+                    const rawTime = document.getElementById('timeInput').value;
+                    if (rawTime) {
+                        const d = new Date(rawTime);
+                        const pad = (n) => n.toString().padStart(2, '0');
+                        val = `${pad(d.getDate())}.${pad(d.getMonth()+1)}.${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+                    }
+                } else if (id === 'lat' || id === 'lon') {
+                    const rawVal = document.getElementById(id).value;
+                    if (!isNaN(parseFloat(rawVal))) {
+                        val = parseFloat(rawVal).toFixed(6);
+                    } else {
+                        val = rawVal;
+                    }
+                } else {
+                    val = document.getElementById(id).value;
+                }
+                
                 if(val) lines.push(`${labels[index]}: ${val}`);
             });
 
@@ -278,7 +512,7 @@
                 });
             }
 
-            const brandText = "Powered by Anglecam";
+            const brandText = "Powered by AngleCam";
             ctx.font = `italic bold ${fontSize * 1.3}px Arial, sans-serif`;
             ctx.textAlign = 'right'; ctx.textBaseline = 'bottom';
             
